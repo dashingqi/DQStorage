@@ -11,8 +11,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/router-annotation" />
-            <option value="$PROJECT_DIR$/router-processor" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -14,5 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ApplicationA"
 include ':app'
-include ':router-annotation'
-include ':router-processor'
