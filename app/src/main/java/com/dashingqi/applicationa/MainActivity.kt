@@ -15,7 +15,10 @@ import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 
 private const val TAG = "MainActivity"
 
@@ -26,8 +29,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnA).setOnClickListener {
             Intent().apply {
                 component = ComponentName(
-                    "com.dashingqi.applicationb",
-                    "com.dashingqi.applicationb.ActionActivity"
+                    "com.dashingqi.applicationb", "com.dashingqi.applicationb.ActionActivity"
                 )
                 startActivity(this)
             }
@@ -56,14 +58,32 @@ class MainActivity : AppCompatActivity() {
                     kotlin.runCatching {
                         val dataUri = intent?.data ?: return
                         Log.d(TAG, "onActivityResult: dataUri is $dataUri")
-                        val realPath = uri2Path(dataUri)
-                        Log.d(TAG, "onActivityResult: realPath is $realPath")
+                        val isFile = getFileInput(this, dataUri)
+                        if (isFile != null) {
+                            Log.d(TAG, "isFile is not null ")
+                        } else {
+                            Log.d(TAG, "isFile is null ")
+                        }
+
                     }.onFailure {
                         it.printStackTrace()
                     }
                 }
             }
         }
+    }
+
+    private fun getFileInput(@NonNull context: Context, @NonNull uri: Uri): InputStream? {
+        val resolver = context.contentResolver
+        kotlin.runCatching {
+            val openAssetFileDescriptor = resolver.openAssetFileDescriptor(uri, "r") ?: return null
+            val parcelFileDescriptor = openAssetFileDescriptor.parcelFileDescriptor
+            if (parcelFileDescriptor != null) {
+                return FileInputStream(parcelFileDescriptor.fileDescriptor)
+            }
+        }
+
+        return null
     }
 
 
@@ -114,8 +134,7 @@ class MainActivity : AppCompatActivity() {
                     val documentId = DocumentsContract.getDocumentId(uri)
                     Log.d(TAG, "download document documentId is $documentId")
                     val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"),
-                        documentId.toLong()
+                        Uri.parse("content://downloads/public_downloads"), documentId.toLong()
                     )
                     return getDataColumn(this, contentUri, null, null)
                 }
@@ -126,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                     val split = documentId.split(":")
                     val type = split[0]
                     Log.d(TAG, "media type is $type")
-                    when(type){
+                    when (type) {
                         "document" -> {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 val findDocumentPath =
@@ -180,13 +199,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_DOCUMENTS) !=
-            PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.MANAGE_DOCUMENTS
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.MANAGE_DOCUMENTS),
-                1000
+                this, arrayOf(Manifest.permission.MANAGE_DOCUMENTS), 1000
             )
         }
     }
