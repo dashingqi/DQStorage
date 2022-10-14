@@ -11,42 +11,47 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import java.io.*
 
-private const val TAG = "MainActivity"
+/** storage tag */
+const val TAG = "DQStorageTAG"
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<Button>(R.id.btnA).setOnClickListener {
-            Intent().apply {
-                component = ComponentName(
-                    "com.dashingqi.applicationb", "com.dashingqi.applicationb.ActionActivity"
-                )
-                startActivity(this)
-            }
+            val file = getFile() ?: return@setOnClickListener
+            Log.d(TAG, "perform copy file")
+            copyImageToPublicDir(this@MainActivity, file)
+
         }
+
+        val iV = findViewById<ImageView>(R.id.bitmap)
 
 
         findViewById<Button>(R.id.btnPermission).setOnClickListener {
-            requestPermission()
+            // requestPermission()
+            assetManager()
+            scanMedia(this, iV)
         }
 
         findViewById<Button>(R.id.btnB).setOnClickListener {
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 // 指定类型
-                type = "application/pdf"
+                type = "application/image"
                 startActivityForResult(this, 10001)
             }
         }
+
+        "s123123".toLongOrNull()
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -71,19 +76,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun getFileInput(@NonNull context: Context, @NonNull uri: Uri): InputStream? {
-        val resolver = context.contentResolver
-        kotlin.runCatching {
-            val openAssetFileDescriptor = resolver.openAssetFileDescriptor(uri, "r") ?: return null
-            val parcelFileDescriptor = openAssetFileDescriptor.parcelFileDescriptor
-            if (parcelFileDescriptor != null) {
-                return FileInputStream(parcelFileDescriptor.fileDescriptor)
-            }
-        }
-
-        return null
     }
 
 
@@ -207,5 +199,30 @@ class MainActivity : AppCompatActivity() {
                 this, arrayOf(Manifest.permission.MANAGE_DOCUMENTS), 1000
             )
         }
+    }
+
+    private fun assetManager() {
+        var iss: InputStream? = null
+        var fos: FileOutputStream? = null
+        try {
+            iss = assets.open("img.png")
+            fos = openFileOutput("img.png", Context.MODE_PRIVATE)
+            iss.copyTo(fos, 1024)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        } finally {
+            kotlin.runCatching {
+                fos?.close()
+            }
+        }
+    }
+
+    private fun getFile(): File? {
+        val filePath = filesDir.absolutePath + "/img.png"
+        val file = File(filePath)
+        if (file.isFile && file.exists()) {
+            return file
+        }
+        return null
     }
 }
