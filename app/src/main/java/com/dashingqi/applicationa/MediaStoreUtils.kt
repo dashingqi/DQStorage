@@ -98,15 +98,12 @@ fun getContentUri(type: Int, id: Long): Uri? {
     }
 }
 
-fun getFileInput(@NonNull context: Context, @NonNull uri: Uri): InputStream? {
+fun getFileInput(
+    @NonNull context: Context, @NonNull uri: Uri
+): InputStream? {
     val resolver = context.contentResolver
     runCatching {
         return resolver.openInputStream(uri)
-        val openAssetFileDescriptor = resolver.openAssetFileDescriptor(uri, "r") ?: return null
-        val parcelFileDescriptor = openAssetFileDescriptor.parcelFileDescriptor
-        if (parcelFileDescriptor != null) {
-            return FileInputStream(parcelFileDescriptor.fileDescriptor)
-        }
     }.onFailure {
         it.printStackTrace()
     }
@@ -125,10 +122,15 @@ fun insertImageIntoMediaStore(context: Context, fileName: String, mimeType: Stri
     return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 }
 
+/**
+ * Android Q 将图片存储到外部存储的Pictures目录下
+ * @param context Context 上下文
+ * @param file File 文件
+ */
 fun copyImageToPublicDir(@NonNull context: Context, @NonNull file: File) {
     if (file.exists() && file.isFile) {
         val uri = insertImageIntoMediaStore(
-            context, file.name, "application/image", "ApplicationPic"
+            context, file.name, "image/*", "ApplicationPic"
         ) ?: return
         val fileDescriptor: ParcelFileDescriptor? = context.contentResolver.openFileDescriptor(uri, "w")
         fileDescriptor ?: return
@@ -136,6 +138,11 @@ fun copyImageToPublicDir(@NonNull context: Context, @NonNull file: File) {
     }
 }
 
+/**
+ * 将文件写入到公共目录Pictures
+ * @param file File
+ * @param fileDescriptor ParcelFileDescriptor
+ */
 fun writeToPublicDir(file: File, fileDescriptor: ParcelFileDescriptor) {
     runCatching {
         val fis = FileInputStream(file)

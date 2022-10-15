@@ -39,10 +39,23 @@ class MainActivity : AppCompatActivity() {
             scanImageMedia(this, iV)
         }
 
+        /**
+         * text/plain（纯文本）
+        text/html（HTML文档）
+        application/xhtml+xml（XHTML文档）
+        image/gif（GIF图像）
+        image/jpeg（JPEG图像）【PHP中为：image/pjpeg】
+        image/png（PNG图像）【PHP中为：image/x-png】
+        video/mpeg（MPEG动画）
+        application/octet-stream（任意的二进制数据）
+        application/pdf（PDF文档）
+        application/msword（Microsoft Word文件）
+        message/rfc822（RFC 822形式）
+         */
         findViewById<Button>(R.id.btnB).setOnClickListener {
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 // 指定类型
-                type = "application/image"
+                type = "image/*"
                 startActivityForResult(this, 10001)
             }
         }
@@ -99,6 +112,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 读取内部存储中的文件
+     * @return File?
+     */
     private fun getFile(): File? {
         // /data/user/0/com.dashingqi.applicationa/files
         val absolutePath = filesDir.absolutePath
