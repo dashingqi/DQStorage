@@ -3,16 +3,11 @@ package com.dashingqi.applicationa
 import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.DocumentsContract
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,16 +24,19 @@ class MainActivity : AppCompatActivity() {
             val file = getFile() ?: return@setOnClickListener
             Log.d(TAG, "perform copy file")
             copyImageToPublicDir(this@MainActivity, file)
-
         }
 
         val iV = findViewById<ImageView>(R.id.bitmap)
+        printPathName()
 
 
         findViewById<Button>(R.id.btnPermission).setOnClickListener {
-            // requestPermission()
             assetManager()
-            scanMedia(this, iV)
+
+        }
+
+        findViewById<Button>(R.id.btnC).setOnClickListener {
+            scanImageMedia(this, iV)
         }
 
         findViewById<Button>(R.id.btnB).setOnClickListener {
@@ -48,10 +46,6 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(this, 10001)
             }
         }
-
-        "s123123".toLongOrNull()
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -76,118 +70,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-
-    /**
-     * uri 转 文件路径
-     * @param uri Uri
-     * @return String
-     */
-    private fun uri2Path(@NonNull uri: Uri): String {
-        // content 开头
-        val schemeContent = ContentResolver.SCHEME_CONTENT
-        // file 开头
-        val schemeFile = ContentResolver.SCHEME_FILE
-        return when (uri.scheme) {
-            schemeContent -> {
-                contentUri2Path(uri)
-            }
-            schemeFile -> {
-                ""
-            }
-
-            else -> {
-                ""
-            }
-        }
-    }
-
-    /**
-     * content开头的uri转文件path
-     * @return String
-     */
-    private fun contentUri2Path(@NonNull uri: Uri): String {
-        val documentUri = DocumentsContract.isDocumentUri(this, uri)
-        if (documentUri) {
-            when {
-                isExternalStorageDocument(uri) -> {
-                    val documentId = DocumentsContract.getDocumentId(uri)
-                    Log.d(TAG, "external storage document documentId is $documentId")
-                    val split = documentId.split(":")
-                    val type = split[0]
-                    if ("primary".equals(type, ignoreCase = true)) {
-                        return "${Environment.getExternalStorageDirectory()}${File.separator}${split[1]}"
-                    }
-                    return ""
-                }
-
-                isDownloadsDocument(uri) -> {
-                    val documentId = DocumentsContract.getDocumentId(uri)
-                    Log.d(TAG, "download document documentId is $documentId")
-                    val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), documentId.toLong()
-                    )
-                    return getDataColumn(this, contentUri, null, null)
-                }
-
-                isMediaDocument(uri) -> {
-                    val documentId = DocumentsContract.getDocumentId(uri)
-                    Log.d(TAG, "media documentId is $documentId")
-                    val split = documentId.split(":")
-                    val type = split[0]
-                    Log.d(TAG, "media type is $type")
-                    when (type) {
-                        "document" -> {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                val findDocumentPath =
-                                    DocumentsContract.findDocumentPath(contentResolver, uri) ?: return ""
-                                findDocumentPath.path.forEach {
-                                    Log.d(TAG, "document path is i")
-                                }
-                            } else {
-
-                            }
-                            return ""
-                        }
-                    }
-                }
-
-                else -> {
-                    return ""
-                }
-            }
-        }
-
-        return ""
-    }
-
-    private fun isExternalStorageDocument(@NonNull uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri.authority
-    }
-
-    private fun isDownloadsDocument(@NonNull uri: Uri): Boolean {
-        return "com.android.providers.downloads.documents" == uri.authority
-    }
-
-    private fun isMediaDocument(@NonNull uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri.authority
-    }
-
-    private fun getDataColumn(context: Context, uri: Uri, selection: String?, selectionArgs: Array<String>?): String {
-        var cursor: Cursor? = null
-        val column = "_data"
-        val projections = arrayOf(column)
-        kotlin.runCatching {
-            cursor = context.contentResolver.query(uri, projections, selection, selectionArgs, null)
-            if (cursor?.moveToFirst() == true) {
-                val columnIndex = cursor?.getColumnIndexOrThrow(column) ?: return ""
-                return cursor?.getString(columnIndex) ?: ""
-            }
-        }.getOrDefault {
-            cursor?.close()
-        }
-        return ""
     }
 
     private fun requestPermission() {
@@ -218,11 +100,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getFile(): File? {
+        // /data/user/0/com.dashingqi.applicationa/files
+        val absolutePath = filesDir.absolutePath
+        val cacheDirPath = cacheDir.absolutePath
+        Log.d(
+            TAG, """
+            cacheDirPath is $cacheDirPath
+            absolutePath is $absolutePath
+            
+        """.trimIndent()
+        )
         val filePath = filesDir.absolutePath + "/img.png"
         val file = File(filePath)
         if (file.isFile && file.exists()) {
             return file
         }
         return null
+    }
+
+    private fun printPathName() {
+        // /data/user/0/com.dashingqi.applicationa/files
+        val absolutePath = filesDir.absolutePath
+        // /data/user/0/com.dashingqi.applicationa/cache
+        val cacheDirPath = cacheDir.absolutePath
+        val dataDirPath = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // /data/user/0/com.dashingqi.applicationa
+            dataDir.absolutePath
+        } else {
+            ""
+        }
+        Log.d(
+            TAG, """
+            cacheDirPath is $cacheDirPath
+            absolutePath is $absolutePath
+            dataDirPath is $dataDirPath
+        """.trimIndent()
+        )
     }
 }

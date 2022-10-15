@@ -30,10 +30,19 @@
         android:id="@+id/btnPermission"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="请求权限"
+        android:text="写入文件到内部存储中"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnB" />
+
+    <Button
+        android:id="@+id/btnC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="读取媒体文件夹中的图片"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPermission" />
 
     <ImageView
         android:id="@+id/bitmap"
@@ -42,7 +51,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnPermission" />
+        app:layout_constraintTop_toBottomOf="@+id/btnC" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
