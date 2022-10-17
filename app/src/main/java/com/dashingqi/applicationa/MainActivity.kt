@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(this, 10001)
             }
         }
+
+        scanPicturesDir(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {

@@ -267,4 +267,32 @@ private fun getDataColumn(context: Context, uri: Uri, selection: String?, select
 }
 
 
+/**
+ * 扫描Pictures目录下的图片
+ */
+fun scanPicturesDir(@NonNull context: Context) {
+    // 这个是查询自己应用 在Pictures目录下存储的图片
+    val cursor = context.contentResolver.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        null,
+        null,
+        null,
+        null
+    ) ?: return
+
+    Log.d(TAG, "pictures size is ${cursor.count}")
+
+    while (cursor.moveToNext()) {
+        val displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
+        val realPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH))
+        Log.d(
+            TAG, """
+            displayName == $displayName
+            realPath == $realPath
+        """.trimIndent()
+        )
+    }
+}
+
+
 
