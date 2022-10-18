@@ -20,11 +20,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        findViewById<Button>(R.id.requestPermission).setOnClickListener {
+            // 请求权限
+            requestPermission()
+        }
+
         findViewById<Button>(R.id.btnA).setOnClickListener {
             val file = getFile() ?: return@setOnClickListener
             Log.d(TAG, "perform copy file")
             copyImageToPublicDir(this@MainActivity, file)
         }
+
+
 
         val iV = findViewById<ImageView>(R.id.bitmap)
         printPathName()
@@ -60,7 +68,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        scanPicturesDir(this)
+        val scanPicturesDir = scanMediaStoreFiles(this, ScanMediaStoreType.MS_PICTURE)
+        Log.d(MEDIA_STORE_TAG, "$scanPicturesDir")
+        Log.d(MEDIA_STORE_TAG, "===================================")
+        val scanAudioDir = scanMediaStoreFiles(this, ScanMediaStoreType.MS_AUDIO)
+        Log.d(MEDIA_STORE_TAG, "$scanAudioDir")
+        Log.d(MEDIA_STORE_TAG, "===================================")
+        val scanVideoList = scanMediaStoreFiles(this, ScanMediaStoreType.MS_VIDEO)
+        Log.d(MEDIA_STORE_TAG, "$scanVideoList")
+        Log.d(MEDIA_STORE_TAG, "===================================")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -89,11 +105,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermission() {
         if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.MANAGE_DOCUMENTS
+                this, Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.MANAGE_DOCUMENTS), 1000
+                this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1000
             )
         }
     }

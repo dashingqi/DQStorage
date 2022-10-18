@@ -8,14 +8,24 @@
 
 
     <Button
-        android:id="@+id/btnA"
+        android:id="@+id/requestPermission"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="存储图片到外部存储中"
+        android:text="请求读写权限"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="存储图片到外部存储中"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/requestPermission"
+         />
 
     <Button
         android:id="@+id/btnB"
